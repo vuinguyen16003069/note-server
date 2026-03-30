@@ -9,7 +9,7 @@ const app = express();
 
 app.use(express.text({ type: '*/*', limit: '100kb' }));
 
-app.get('/', (req, res) => {
+app.get('/note', (req, res) => {
     res.redirect(302, `/note/${uuidv4()}`);
 });
 
