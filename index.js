@@ -1,6 +1,6 @@
-import 'dotenv/config'; // Nạp biến môi trường từ file .env
-import app from './api/index.js';
+require('dotenv/config');
 
+const app = require('./api/index.js');
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

@@ -1,9 +1,9 @@
 // api/index.js
-import express from 'express';
-import { createClient } from 'redis';
-import { v4 as uuidv4 } from 'uuid';
-import path from 'path';
-import fs from 'fs';
+const express = require('express');
+const { createClient } = require('redis');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 
@@ -20,8 +20,13 @@ const redisClient = createClient({
 });
 
 redisClient.on('error', (err) => console.error('Redis Client Error:', err));
-await redisClient.connect();
-console.log('[Redis] Đã kết nối thành công!');
+
+const connectRedis = async () => {
+    await redisClient.connect();
+    console.log('[Redis] Đã kết nối thành công!');
+};
+
+connectRedis();
 
 app.post('/api/create', (req, res) => {
     const id = uuidv4();
@@ -65,4 +70,4 @@ app.put('/note/:id', async (req, res) => {
     }
 });
 
-export default app;
+module.exports = app;
