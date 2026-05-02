@@ -14,7 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const path = window.location.pathname;
   const isNote = path.startsWith('/note/');
 
-  if (isNote) {
+  if (path === '/note' || path === '/note/') {
+    fetch('/api/create', { method: 'POST' })
+      .then((r) => r.json())
+      .then((data) => {
+        window.history.pushState({}, '', `/note/${data.id}`);
+        homeView.classList.add('hidden');
+        editorView.style.display = 'flex';
+        initEditor();
+      });
+  } else if (isNote) {
     homeView.classList.add('hidden');
     editorView.style.display = 'flex';
     initEditor();
@@ -77,7 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
       statusIndicator.classList.add('saving');
       statusText.textContent = 'Saving...';
 
-      fetch(window.location.href, {
+      const noteId = window.location.pathname.split('/').pop();
+      fetch(`/api/note/${noteId}`, {
         method: 'PUT',
         headers: { 'content-type': 'text/plain; charset=utf-8' },
         body: editor.value,
@@ -124,9 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
       lineNumbers.scrollTop = editor.scrollTop;
     });
 
-    const u = new URL(window.location.href);
-    u.searchParams.append('raw', 'true');
-    fetch(u.href, { method: 'GET' })
+    const noteId = window.location.pathname.split('/').pop();
+    fetch(`/api/note/${noteId}`, { method: 'GET' })
       .then((r) => r.text())
       .then((t) => {
         editor.value = t;

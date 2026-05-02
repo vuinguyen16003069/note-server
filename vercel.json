@@ -1,9 +1,9 @@
 {
   "version": 2,
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api/index.js"
-    }
+    { "source": "/api/note/:id", "destination": "/api/index.js" },
+    { "source": "/api/create", "destination": "/api/index.js" },
+    { "source": "/note/:id", "destination": "/index.html" },
+    { "source": "/note", "destination": "/index.html" }
   ]
 }

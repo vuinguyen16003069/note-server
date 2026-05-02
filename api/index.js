@@ -5,8 +5,6 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 
 const { v4: uuidv4 } = require('uuid');
-const path = require('node:path');
-const fs = require('node:fs');
 
 const app = express();
 
@@ -27,48 +25,32 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-app.get('/robots.txt', (req, res) => {
-  res.type('text/plain');
-  res.send('User-agent: *\nAllow: /\nDisallow: /api/');
-});
-
-app.get('/note', (req, res) => {
-  res.redirect(302, `/note/${uuidv4()}`);
-});
-
-app.use(express.static(path.join(process.cwd(), 'public')));
-
 const redisClient = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
-app.post('/api/create', (req, res) => {
-  const id = uuidv4();
-  res.redirect(302, `/note/${id}`);
+app.get('/api/note', (req, res) => {
+  res.json({ id: uuidv4() });
 });
 
-app.get('/note/:id', async (req, res) => {
-  const { id } = req.params;
+app.post('/api/create', (req, res) => {
+  res.json({ id: uuidv4() });
+});
 
-  if (req.query.raw === 'true') {
-    try {
-      const content = await redisClient.get(`note:${id}`);
-      return res.status(200).send(content || '');
-    } catch (error) {
-      console.error('Database access error');
-      return res.status(500).send('Database Error');
-    }
-  } else {
-    const filePath = path.join(process.cwd(), 'public', 'index.html');
-    if (!fs.existsSync(filePath)) return res.status(404).send('UI not found');
-    return res.status(200).send(fs.readFileSync(filePath, 'utf8'));
+app.get('/api/note/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const content = await redisClient.get(`note:${id}`);
+    return res.status(200).send(content || '');
+  } catch (error) {
+    console.error('Database access error');
+    return res.status(500).send('Database Error');
   }
 });
 
-app.put('/note/:id', async (req, res) => {
+app.put('/api/note/:id', async (req, res) => {
   const { id } = req.params;
-
   let content = '';
   if (typeof req.body === 'string') {
     content = req.body;
@@ -86,7 +68,7 @@ app.put('/note/:id', async (req, res) => {
 });
 
 app.use((req, res) => {
-  res.status(404).send('Not Found');
+  res.status(404).send('API Route Not Found');
 });
 
 app.use((err, req, res, next) => {
