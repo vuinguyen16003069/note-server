@@ -7,8 +7,10 @@ const rateLimit = require('express-rate-limit');
 const path = require('node:path');
 const fs = require('node:fs');
 
-const CLI_UA = /^(curl|Wget|Postman|insomnia|HTTPie)/i;
-const isCLI = (req) => CLI_UA.test(req.headers['user-agent'] ?? '');
+const isCLI = (req) => {
+  const ua = req.headers['user-agent'] ?? '';
+  return !/Mozilla|Chrome|Safari|Edge|OPR|Firefox/i.test(ua);
+};
 
 const { v4: uuidv4 } = require('uuid');
 
