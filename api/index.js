@@ -38,7 +38,7 @@ app.post('/api/create', (req, res) => {
   res.json({ id: uuidv4() });
 });
 
-app.get('/api/note/:id', async (req, res) => {
+app.get(['/api/note/:id', '/note/:id'], async (req, res) => {
   const { id } = req.params;
   try {
     const content = await redisClient.get(`note:${id}`);
