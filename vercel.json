@@ -18,7 +18,7 @@
       ],
       "destination": "/api/index.js"
     },
-    { "source": "/note/:id", "destination": "/index.html" },
+    { "source": "/note/:id", "destination": "/api/index.js" },
     { "source": "/note", "destination": "/index.html" }
   ]
 }

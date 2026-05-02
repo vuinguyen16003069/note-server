@@ -69,7 +69,7 @@ app.get('/note/:id', async (req, res) => {
   return res.sendFile(filePath);
 });
 
-app.put('/api/note/:id', async (req, res) => {
+app.put(['/api/note/:id', '/note/:id'], async (req, res) => {
   const { id } = req.params;
   let content = '';
   if (typeof req.body === 'string') {
