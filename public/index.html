@@ -1,105 +1,91 @@
-
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta property="og:title" content="API GHICHU" />
-  <meta property="og:description" content="API GHICHU" />
-  <meta property="og:image" content="https://i.imgur.com/LgH7rtS.png" />
-  <meta property="og:url" content="https://ghichu.phungtuanhai.site" />
-  <meta property="og:site_name" content="HARIN" />
-  <meta property="og:type" content="website" />
-  <link href="https://i.imgur.com/LgH7rtS.png" rel="icon" type="image/x-icon" />
-  <title>API GHICHU</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #ADD8E6;
-    }
-
-    .container {
-      text-align: center;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      font-size: 20px;
-      color: #00FFCC;
-      font-weight: normal;
-    }
-
-    ul {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    li {
-      margin: 10px 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    a {
-      text-decoration: none;
-      color: #007BFF;
-      font-size: 18px;
-      transition: color 0.3s;
-      margin-right: 10px;
-    }
-
-    a:hover {
-      text-decoration: underline;
-      color: #0056b3;
-    }
-
-    .logo {
-      width: 100px;
-      margin-bottom: 20px;
-    }
-
-    .btn {
-      background-color: #ADD8E6;
-      color: #007BFF;
-      border: none;
-      padding: 5px 10px;
-      cursor: pointer;
-      font-size: 14px;
-      border-radius: 20px;
-      transition: background-color 0.3s;
-    }
-
-    .btn:hover {
-      background-color: #87CEEB;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A minimalist, high-performance cloud note editor inspired by VS Code. No registration required, auto-saving, and easy sharing.">
+    <meta property="og:title" content="Note Service — Minimalist Cloud Editor">
+    <meta property="og:description" content="The fastest way to write and share notes online. No registration, auto-sync, and VS Code vibes.">
+    <meta property="og:image" content="https://i.imgur.com/LgH7rtS.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Note Service — Minimalist Cloud Editor">
+    <meta name="twitter:description" content="Write and share notes instantly. VS Code style editor in your browser.">
+    <meta name="twitter:image" content="https://i.imgur.com/LgH7rtS.png">
+    <title>Note Service — Minimalist Cloud Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://i.imgur.com/LgH7rtS.png">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
-
 <body>
-  <div class="container">
-    <img src="https://i.imgur.com/LgH7rtS.png" alt="Logo" class="logo">
-    <h1>Welcome to API NOTE</h1>
-    <ul>
-      <li>
-        <a href="/note">/note/:UUID</a>
-        <button class="btn" onclick="location.href='/note'">GET</button>
-      </li>
-    </ul>
-  </div>
-</body>
+    <div id="homeView" class="home-view">
 
+        <div class="home-container">
+            <img src="https://i.imgur.com/LgH7rtS.png" alt="Logo" class="logo">
+            <h1>Note Service</h1>
+            <p class="home-description">Experience the fastest, most minimalist cloud editor. No registration, no fuss. Just write and share.</p>
+            <button class="btn" onclick="location.href='/note'">
+                <span>Create New Note</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+        </div>
+    </div>
+
+    <div id="editorView" class="editor-view">
+
+        <div class="editor-header">
+            <div class="header-left">
+                <div>
+                    <h3 class="editor-title">Note Service</h3>
+                    <div class="editor-subtitle">Cloud Sync Enabled</div>
+                </div>
+            </div>
+            <div class="header-right">
+
+                <button class="header-btn" id="copyUrlBtn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    <span>Copy URL</span>
+                </button>
+                <button class="header-btn" id="themeToggle">
+                    <svg id="theme-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <span id="theme-text">Light Mode</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="editor-container">
+            <div class="line-numbers" id="lineNumbers"></div>
+            <div class="editor-content">
+                <textarea id="editor" class="editor-textarea" placeholder="Start typing your thoughts..."></textarea>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="status-item">
+                <span id="statusIndicator" class="status-indicator"></span>
+                <span id="statusText">Ready</span>
+            </div>
+            <div class="status-item">
+                <span id="cursorPosition">Ln 1, Col 1</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Copied to clipboard!</div>
+
+    <script src="/js/script.js"></script>
+
+</body>
 </html>

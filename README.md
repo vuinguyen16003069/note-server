@@ -1,15 +1,15 @@
-# 📝 Note Server
+# 📝 Note Server (SPA Edition)
 
-Ứng dụng ghi chú online với giao diện giả lập VS Code Editor. Mỗi ghi chú có URL riêng, tự động lưu, không cần đăng ký tài khoản.
+Ứng dụng ghi chú online với giao diện giả lập VS Code Editor, được xây dựng theo kiến trúc Single Page Application (SPA). Mỗi ghi chú có URL riêng, tự động lưu, không cần đăng ký tài khoản.
 
 ## Tính năng
 
-- Truy cập trang web → tự động sinh UUID và chuyển đến editor mới
-- Giao diện giống VS Code (dark/light theme, line numbers, status bar)
-- Tự động lưu sau 1 giây khi ngừng gõ
-- Chia sẻ ghi chú qua URL
-- Lấy nội dung thuần text qua `?raw=true`
-- Ghi chú được lưu trong 30 ngày
+- **SPA Architecture**: Chuyển đổi mượt mà giữa trang chủ và trình chỉnh sửa không cần load lại trang.
+- **VS Code Interface**: Giao diện chuyên nghiệp với Dark/Light mode, số dòng (line numbers), thanh trạng thái (status bar).
+- **Auto Save**: Tự động lưu nội dung sau 1 giây khi ngừng gõ.
+- **Serverless Ready**: Tối ưu hóa hoàn toàn cho Vercel và Upstash Redis.
+- **Text Raw Mode**: Lấy nội dung thuần qua tham số `?raw=true`.
+- **Biome Tooling**: Sử dụng Biome để lint và format code cực nhanh.
 
 ## Cài đặt
 
@@ -22,81 +22,52 @@ npm install
 Tạo file `.env` ở thư mục gốc:
 
 ```env
-REDIS_URL=redis://localhost:6379
+UPSTASH_REDIS_REST_URL="https://your-db-url.upstash.io"
+UPSTASH_REDIS_REST_TOKEN="your-secret-token"
 PORT=3000
 ```
 
-> Nếu dùng Redis Cloud (Upstash, RedisLabs...), thay bằng URL kết nối tương ứng.
-
-## Chạy local
+## Phát triển & Kiểm tra
 
 ```bash
-npm start
+# Chạy local
+npm run dev
+
+# Lint code
+npm run lint
+
+# Format code
+npm run format
+
+# Kiểm tra và sửa lỗi tự động
+npm run check
 ```
-
-Mở trình duyệt tại: [http://localhost:3000](http://localhost:3000)
-
-## API
-
-| Method | Endpoint | Mô tả |
-|--------|----------|--------|
-| `GET` | `/` | Tạo UUID mới, redirect đến editor |
-| `GET` | `/note/:id` | Mở editor với ghi chú theo ID |
-| `GET` | `/note/:id?raw=true` | Lấy nội dung thuần text |
-| `PUT` | `/note/:id` | Lưu nội dung ghi chú |
-| `POST` | `/api/create` | Tạo UUID mới, redirect đến editor |
 
 ## Cấu trúc dự án
 
 ```
-├── index.js          # Entry point, khởi động server
 ├── api/
-│   └── index.js      # Express app, routes, kết nối Redis
+│   └── index.js      # Express app (Serverless Function)
 ├── public/
-│   ├── index.html    # Landing page
-│   └── editor.html   # Giao diện VS Code editor
-└── .env              # Biến môi trường (không commit)
+│   ├── css/
+│   │   └── style.css # Unified Styles
+│   ├── js/
+│   │   └── app.js   # SPA Logic & Editor
+│   └── index.html    # Master HTML file
+├── biome.json        # Biome configuration
+├── vercel.json       # Vercel deployment config
+└── .env              # Environment variables
 ```
 
-## Lấy REDIS_URL miễn phí (Upstash)
+## Triển khai lên Vercel
 
-1. Truy cập [https://upstash.com](https://upstash.com) → **Sign Up** (đăng ký bằng GitHub/Google)
-2. Vào **Console** → chọn **Redis** → nhấn **Create Database**
-3. Điền tên DB, chọn region gần nhất (ví dụ: `ap-southeast-1` cho Đông Nam Á)
-4. Sau khi tạo xong, vào tab **Details** → copy dòng **UPSTASH_REDIS_REST_URL** hoặc cuộn xuống phần **Connect** → chọn tab **Node.js** → copy `REDIS_URL`
-5. Dán vào file `.env`:
-   ```env
-   REDIS_URL=rediss://default:<password>@<host>.upstash.io:<port>
-   ```
-
-> Upstash free tier: 10.000 lệnh/ngày, đủ dùng cho dự án cá nhân.
-
----
-
-## Deploy lên Vercel
-
-> Yêu cầu đã có `REDIS_URL` từ bước trên.
-
-1. Truy cập [https://vercel.com](https://vercel.com) → **Sign Up** bằng GitHub
-2. Push code lên GitHub (đảm bảo `.env` có trong `.gitignore`)
-3. Trên Vercel → **Add New Project** → Import repo vừa push
-4. Trước khi deploy, vào **Environment Variables** → thêm:
-   - Key: `REDIS_URL` — Value: URL từ Upstash
-5. Nhấn **Deploy**
-
-**Thêm file `vercel.json`** vào thư mục gốc để Vercel định tuyến đúng:
-
-```json
-{
-  "rewrites": [{ "source": "/(.*)", "destination": "/api/index.js" }]
-}
-```
-
-Sau khi deploy xong, Vercel cấp tên miền dạng `https://<tên-project>.vercel.app`.
+1. Kết nối repository của bạn với Vercel.
+2. Thêm các biến môi trường: `UPSTASH_REDIS_REST_URL` và `UPSTASH_REDIS_REST_TOKEN`.
+3. Vercel sẽ tự động nhận diện cấu hình và deploy.
 
 ---
 
 ## Yêu cầu
 
 - Node.js 18+
-- Redis (local hoặc cloud)
+- Tài khoản Upstash (cho Redis REST API)
