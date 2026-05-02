@@ -37,7 +37,7 @@ const redisClient = new Redis({
 });
 
 app.get('/api/note', (req, res) => {
-  res.json({ id: uuidv4() });
+  res.redirect(`/note/${uuidv4()}`);
 });
 
 app.post('/api/create', (req, res) => {
