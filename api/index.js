@@ -3,7 +3,6 @@ const { Redis } = require('@upstash/redis');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
-const morgan = require('morgan');
 
 const { v4: uuidv4 } = require('uuid');
 const path = require('node:path');
@@ -11,13 +10,14 @@ const fs = require('node:fs');
 
 const app = express();
 
+const NOTE_TTL = 30 * 24 * 60 * 60;
+
 app.use(
   helmet({
     contentSecurityPolicy: false,
   }),
 );
 app.use(compression());
-app.use(morgan('dev'));
 app.use(express.text({ type: '*/*', limit: '100kb' }));
 
 const limiter = rateLimit({
@@ -56,7 +56,7 @@ app.get('/note/:id', async (req, res) => {
       const content = await redisClient.get(`note:${id}`);
       return res.status(200).send(content || '');
     } catch (error) {
-      console.error('Redis Read Error:', error);
+      console.error('Database access error');
       return res.status(500).send('Database Error');
     }
   } else {
@@ -77,10 +77,10 @@ app.put('/note/:id', async (req, res) => {
   }
 
   try {
-    await redisClient.set(`note:${id}`, content, { ex: 2592000 });
+    await redisClient.set(`note:${id}`, content, { ex: NOTE_TTL });
     return res.status(200).send('Saved');
   } catch (error) {
-    console.error('Redis Write Error:', error);
+    console.error('Database write error');
     return res.status(500).send('Internal Server Error');
   }
 });
@@ -90,7 +90,7 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Application error');
   res.status(500).send('Something broke!');
 });
 
