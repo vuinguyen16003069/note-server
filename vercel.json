@@ -8,6 +8,17 @@
       "has": [{ "type": "query", "key": "raw", "value": "true" }],
       "destination": "/api/index.js"
     },
+    {
+      "source": "/note/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "User-Agent",
+          "value": "(?i)(curl|Wget|Postman|insomnia|HTTPie).*"
+        }
+      ],
+      "destination": "/api/index.js"
+    },
     { "source": "/note/:id", "destination": "/index.html" },
     { "source": "/note", "destination": "/index.html" }
   ]

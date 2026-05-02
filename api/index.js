@@ -4,6 +4,12 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 
+const path = require('node:path');
+const fs = require('node:fs');
+
+const CLI_UA = /^(curl|Wget|Postman|insomnia|HTTPie)/i;
+const isCLI = (req) => CLI_UA.test(req.headers['user-agent'] ?? '');
+
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
@@ -40,14 +46,23 @@ app.post('/api/create', (req, res) => {
 
 app.get(['/api/note/:id', '/note/:id'], async (req, res) => {
   const { id } = req.params;
-  try {
-    const content = await redisClient.get(`note:${id}`);
-    return res.status(200).send(content || '');
-  } catch (error) {
-    console.error('Database access error');
-    return res.status(500).send('Database Error');
+  if (isCLI(req) || req.query.raw === 'true') {
+    try {
+      const content = await redisClient.get(`note:${id}`);
+      return res.status(200).send(content || '');
+    } catch (error) {
+      console.error('Database access error');
+      return res.status(500).send('Database Error');
+    }
   }
+  // Fallback for browsers if not handled by static rewrites
+  const filePath = path.join(process.cwd(), 'public', 'index.html');
+  if (fs.existsSync(filePath)) {
+    return res.status(200).send(fs.readFileSync(filePath, 'utf8'));
+  }
+  return res.status(404).send('Not Found');
 });
+
 
 app.put('/api/note/:id', async (req, res) => {
   const { id } = req.params;
