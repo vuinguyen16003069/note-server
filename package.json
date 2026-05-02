@@ -1,6 +1,6 @@
 {
-  "name": "vsc-note-clone",
-  "version": "1.0.0",
+  "name": "vuiz-note",
+  "version": "1.0.2",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",

@@ -22,12 +22,12 @@ app.use(
   }),
 );
 app.use(compression());
-app.use(express.text({ type: '*/*', limit: '100kb' }));
+app.use(express.text({ type: '*/*', limit: '200kb' }));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: 'Too many requests from this IP, please try again later.',
+  max: 200,
+  message: { error: 'Too many requests, please try again later.' },
 });
 app.use('/api/', limiter);
 
@@ -44,25 +44,30 @@ app.post('/api/create', (req, res) => {
   res.json({ id: uuidv4() });
 });
 
-app.get(['/api/note/:id', '/note/:id'], async (req, res) => {
+app.get('/api/note/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const content = await redisClient.get(`note:${id}`);
+    return res.status(200).send(content || '');
+  } catch (error) {
+    console.error('Database access error');
+    return res.status(500).send('Database Error');
+  }
+});
+
+app.get('/note/:id', async (req, res) => {
   const { id } = req.params;
   if (isCLI(req) || req.query.raw === 'true') {
     try {
       const content = await redisClient.get(`note:${id}`);
       return res.status(200).send(content || '');
     } catch (error) {
-      console.error('Database access error');
       return res.status(500).send('Database Error');
     }
   }
-  // Fallback for browsers if not handled by static rewrites
   const filePath = path.join(process.cwd(), 'public', 'index.html');
-  if (fs.existsSync(filePath)) {
-    return res.status(200).send(fs.readFileSync(filePath, 'utf8'));
-  }
-  return res.status(404).send('Not Found');
+  return res.sendFile(filePath);
 });
-
 
 app.put('/api/note/:id', async (req, res) => {
   const { id } = req.params;
@@ -82,7 +87,7 @@ app.put('/api/note/:id', async (req, res) => {
   }
 });
 
-app.use((req, res) => {
+app.use('/api/*', (req, res) => {
   res.status(404).send('API Route Not Found');
 });
 
