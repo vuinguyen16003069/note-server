@@ -124,8 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
           div.textContent = i;
           fragment.appendChild(div);
         }
-        lineNumbers.innerHTML = '';
-        lineNumbers.appendChild(fragment);
+        lineNumbers.replaceChildren(fragment);
         lastLineCount = currentLineCount;
       }
 

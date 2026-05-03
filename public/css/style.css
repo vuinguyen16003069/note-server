@@ -523,10 +523,11 @@ body {
   text-align: right;
   user-select: none;
   border-right: none;
+  border-left: 3px solid var(--accent);
   overflow: hidden;
   min-width: 50px;
   font-family: "JetBrains Mono", monospace;
-  font-size: 13px;
+  font-size: 14px;
   display: flex;
   flex-direction: column;
 }
@@ -542,6 +543,7 @@ body {
 .line-number.active {
   color: var(--accent);
   opacity: 1;
+  background-color: var(--active-line);
 }
 
 .editor-content {
