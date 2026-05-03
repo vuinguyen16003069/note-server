@@ -522,7 +522,7 @@ body {
   padding: 16px 0;
   text-align: right;
   user-select: none;
-  border-right: 1px solid var(--border);
+  border-right: none;
   overflow: hidden;
   min-width: 50px;
   font-family: "JetBrains Mono", monospace;
