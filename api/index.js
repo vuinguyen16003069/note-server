@@ -4,27 +4,43 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 
-const path = require('node:path');
-const fs = require('node:fs');
+const app = express();
+
+const NOTE_TTL = 30 * 24 * 60 * 60;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const isCLI = (req) => {
   const ua = req.headers['user-agent'] ?? '';
   return !/Mozilla|Chrome|Safari|Edge|OPR|Firefox/i.test(ua);
 };
 
-const { v4: uuidv4 } = require('uuid');
-
-const app = express();
-
-const NOTE_TTL = 30 * 24 * 60 * 60;
+const validateNoteId = (req, res, next) => {
+  const { id } = req.params;
+  if (!UUID_REGEX.test(id)) {
+    return res.status(400).json({ error: 'Invalid note ID format. Expected UUID v4.' });
+  }
+  next();
+};
 
 app.use(
   helmet({
     contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   }),
 );
 app.use(compression());
-app.use(express.text({ type: '*/*', limit: '200kb' }));
+app.use(express.text({ type: 'text/plain', limit: '200kb' }));
+app.use(express.json({ limit: '200kb' }));
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -38,40 +54,41 @@ const redisClient = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
-app.get('/api/note', (req, res) => {
-  res.redirect(`/note/${uuidv4()}`);
-});
-
-app.post('/api/create', (req, res) => {
-  res.json({ id: uuidv4() });
-});
-
-app.get('/api/note/:id', async (req, res) => {
+app.get('/api/note/:id', validateNoteId, async (req, res) => {
   const { id } = req.params;
   try {
     const content = await redisClient.get(`note:${id}`);
-    return res.status(200).send(content || '');
+    res.set('Cache-Control', 'no-cache');
+    return res
+      .status(200)
+      .type('text/plain')
+      .send(content || '');
   } catch (error) {
-    console.error('Database access error');
-    return res.status(500).send('Database Error');
+    console.error('Database read error:', error.message);
+    return res.status(503).json({ error: 'Service temporarily unavailable' });
   }
 });
 
-app.get('/note/:id', async (req, res) => {
+app.get('/note/:id', validateNoteId, async (req, res) => {
   const { id } = req.params;
   if (isCLI(req) || req.query.raw === 'true') {
     try {
       const content = await redisClient.get(`note:${id}`);
-      return res.status(200).send(content || '');
+      res.set('Cache-Control', 'no-cache');
+      return res
+        .status(200)
+        .type('text/plain')
+        .send(content || '');
     } catch (error) {
-      return res.status(500).send('Database Error');
+      console.error('Database read error:', error.message);
+      return res.status(503).send('Service temporarily unavailable');
     }
   }
-  const filePath = path.join(process.cwd(), 'public', 'index.html');
+  const filePath = require('node:path').join(process.cwd(), 'public', 'index.html');
   return res.sendFile(filePath);
 });
 
-app.put(['/api/note/:id', '/note/:id'], async (req, res) => {
+app.put(['/api/note/:id', '/note/:id'], validateNoteId, async (req, res) => {
   const { id } = req.params;
   let content = '';
   if (typeof req.body === 'string') {
@@ -80,22 +97,37 @@ app.put(['/api/note/:id', '/note/:id'], async (req, res) => {
     content = JSON.stringify(req.body);
   }
 
+  if (content.length > 200 * 1024) {
+    return res.status(413).json({ error: 'Content too large. Maximum 200KB.' });
+  }
+
   try {
     await redisClient.set(`note:${id}`, content, { ex: NOTE_TTL });
-    return res.status(200).send('Saved');
+    return res.status(200).json({ status: 'saved', id, size: content.length });
   } catch (error) {
-    console.error('Database write error');
-    return res.status(500).send('Internal Server Error');
+    console.error('Database write error:', error.message);
+    return res.status(503).json({ error: 'Service temporarily unavailable' });
+  }
+});
+
+app.delete(['/api/note/:id', '/note/:id'], validateNoteId, async (req, res) => {
+  const { id } = req.params;
+  try {
+    await redisClient.del(`note:${id}`);
+    return res.status(200).json({ status: 'deleted', id });
+  } catch (error) {
+    console.error('Database delete error:', error.message);
+    return res.status(503).json({ error: 'Service temporarily unavailable' });
   }
 });
 
 app.use('/api/*', (req, res) => {
-  res.status(404).send('API Route Not Found');
+  res.status(404).json({ error: 'API route not found' });
 });
 
-app.use((err, req, res, next) => {
-  console.error('Application error');
-  res.status(500).send('Something broke!');
+app.use((err, req, res, _next) => {
+  console.error('Unhandled error:', err.message);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 module.exports = app;

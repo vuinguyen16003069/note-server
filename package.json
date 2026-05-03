@@ -1,10 +1,11 @@
 {
   "name": "vuiz-note",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
     "lint": "biome lint .",
+    "lint:fix": "biome check --write .",
     "format": "biome format . --write",
     "check": "biome check --write .",
     "lint:fix:unsafe": "biome check --write --unsafe ."
@@ -15,8 +16,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-rate-limit": "^8.4.1",
-    "helmet": "^8.1.0",
-    "uuid": "^9.0.0"
+    "helmet": "^8.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
