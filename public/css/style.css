@@ -523,7 +523,7 @@ body {
   text-align: right;
   user-select: none;
   border-right: none;
-  border-left: 3px solid var(--accent);
+  border-left: none;
   overflow: hidden;
   min-width: 50px;
   font-family: "JetBrains Mono", monospace;
@@ -559,7 +559,7 @@ body {
   color: var(--text);
   border: none;
   resize: none;
-  outline: none;
+  outline: none !important;
   padding: 16px;
   font-family: "JetBrains Mono", monospace;
   font-size: 14px;
